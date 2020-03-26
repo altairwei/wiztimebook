@@ -13,7 +13,7 @@ plot_class_time(df, cls = NULL, time_units = "hours", ...)
 
 \item{time_units}{Unit of time cost, such as 'hours', 'minutes' and so on.}
 
-\item{...}{Arguments will be passed to \code{ggplot2::\link[ggplot2]{geom_col}} .}
+\item{...}{Arguments will be passed to \code{ggplot2::geom_col} .}
 }
 \value{
 A ggplot object

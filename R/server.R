@@ -1,10 +1,10 @@
-library(shiny)
-library(magrittr)
-library(wiztimebook)
-library(lubridate)
-library(plotly)
-
-function(input, output) {
+#' Main server logic
+#' 
+#' @param input,output Arguments passed by \code{shiny::callModule} .
+#' 
+#' @importFrom lubridate today
+#' @importFrom shiny reactive reactiveValues observeEvent getShinyOption
+mainServer <- function(input, output, session) {
   user <- user_info(
     getShinyOption("wiz_user_name"),
     getShinyOption("wiz_data_location")

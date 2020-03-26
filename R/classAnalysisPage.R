@@ -1,13 +1,11 @@
-library(shiny)
-library(shinydashboard)
-library(shinyjqui)
-library(wiztimebook)
-
 #' UI of class analysis page
 #'
 #' @param id Namespace of this page.
 #' 
 #' @return Same to \code{shiny::fluidRow} function.
+#' 
+#' @importFrom shiny NS fluidRow plotOutput selectInput uiOutput
+#' @importFrom shinydashboard box
 classAnalysisPageUI <- function(id) {
   ns <- NS(id)
   fluidRow(
@@ -27,6 +25,11 @@ classAnalysisPageUI <- function(id) {
 #'
 #' @param input,output,session Arguments passed by \code{shiny::callModule} .
 #' @param df A data frame which used to plot histogram.
+#' 
+#' @importFrom dplyr filter
+#' @importFrom magrittr %>%
+#' @importFrom shiny renderUI checkboxGroupInput reactive renderPlot
+#' @importFrom shinyjqui sortableCheckboxGroupInput
 classAnalysisPage <- function(input, output, session, df) {
   # Render control panel
   output$class_candidates <- renderUI({

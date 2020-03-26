@@ -33,4 +33,5 @@ Imports:
     DT,
     plotly,
     sortable,
-    shinyjqui
+    shinyjqui,
+    treemapify
