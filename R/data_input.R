@@ -1,3 +1,82 @@
+#' Extract records from given page document
+#' 
+#' `query_records` will produce tidy data from WizNote database.
+#' 
+#' @param user_info An user information S3 object.
+#' @param date Any input for `lubridate::ymd` function. One page of time ledge
+#'  per day.
+#' 
+#' @return A tidy tibble that contains event time records of your each day.
+#' 
+#' @importFrom lubridate ymd ymd_hm
+#' @importFrom magrittr %>%
+#' @importFrom purrr map pmap reduce
+#' @importFrom dplyr mutate bind_rows
+#' 
+#' @export
+query_records <- function(user_info, start, end) {
+  # Format inputs
+  start_day <- ymd(start)
+  end_day <- ymd(end)
+  # Query meta information
+  data_info_table <- query_page_metainfo(user_info, start_day, end_day)
+  #TODO: Parse table from each document
+  data_info_table %>%
+    pmap(function(DOCUMENT_GUID, DOCUMENT_TITLE, DOCUMENT_LOCATION) {
+      read_table_from_doc(user_info, DOCUMENT_GUID) %>%
+        mutate(Date = ymd(DOCUMENT_TITLE), GUID = DOCUMENT_GUID)
+    }) %>% map(tidy_records) %>% reduce(bind_rows)
+}
+
+#' Find document meta information from WizNote database
+#' 
+#' `query_page_metainfo` will extract document meta information from WizNote
+#' database with the given start to end date.
+#' 
+#' @param user_info An user information S3 object.
+#' @param start,end Any input for `lubridate::ymd` function.
+#' 
+#' @return A tibble that contains meta informatin of WizNote document
+#' 
+#' @importFrom DBI dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
+#' @importFrom RSQLite SQLite
+#' @importFrom lubridate ymd
+#' @importFrom tidyr as_tibble
+query_page_metainfo <- function(user_info, start, end) {
+  start_date <- ymd(start)
+  end_date <- ymd(end)
+  
+  # Connect to index.db
+  con <- dbConnect(SQLite(), user_info$index_db)
+  
+  # Fetch document meta information
+  res <- dbSendQuery(con, sprintf(
+    "select DOCUMENT_GUID,DOCUMENT_TITLE,DOCUMENT_LOCATION from WIZ_DOCUMENT
+      where DOCUMENT_LOCATION like '%s%%'
+      and DOCUMENT_TITLE like '____-__-__'
+      and DOCUMENT_TITLE >= '%s' and DOCUMENT_TITLE <= '%s'", 
+    user_info$data_location, start_date, end_date))
+  x <- dbFetch(res) %>% as_tibble()
+  
+  # Close connection
+  dbClearResult(res)
+  dbDisconnect(con)
+  
+  x
+}
+
+#' Get html text from WizNotePlus document zipfile
+#' 
+#' @param filename WizNote document zipfile name
+#'
+#' @return string. The html text of document zipfile.
+#' 
+#' @importFrom readr read_file
+read_html_from_doc <- function(filename) {
+  conn <- unz(filename, "index.html")
+  read_file(conn)
+}
+
 #' Extract table from html text
 #' 
 #' @param user_info An user information S3 object.
@@ -36,7 +115,7 @@ read_table_from_doc <- function(user_info, doc_guid) {
 #' 
 #' @importFrom rvest html_name html_nodes html_node html_attr html_text
 html_table_to_dataframe <- function(x, header = NA, trim = TRUE,
-                                 fill = FALSE, dec = ".") {
+                                    fill = FALSE, dec = ".") {
   
   stopifnot(html_name(x) == "table")
   
@@ -148,4 +227,60 @@ html_table_to_dataframe <- function(x, header = NA, trim = TRUE,
   }
   
   df
+}
+
+#' Organize records table
+#' 
+#' `tidy_records` is very verbose.
+#' 
+#' @param records A tibble.
+#' @param date Any input for `lubridate::ymd` function.
+#' 
+#' @return A tidy tibble.
+#' 
+#' @importFrom dplyr filter mutate
+#' @importFrom tidyr separate_rows separate
+#' @importFrom lubridate ymd ymd_hm
+#' @importFrom purrr pwalk
+tidy_records <- function(records) {
+  # Remove empty records
+  records <-  records %>% filter(is_valid(Record))
+  # Seperate records to each rows
+  records <- records %>% separate_rows(Record, sep = ";\\s*") %>%
+    separate(Record, into = c("Start", "End"), sep = ",\\s*")
+  # Notify user to check the tabble again
+  records <- records %>%
+    pwalk(check_record_startend) %>% filter(is_valid(Start) & is_valid(End))
+  # Compute time
+  records <- records %>% mutate(
+    Start = ymd_hm(paste(Date, Start)),
+    End = ymd_hm(paste(Date, End))) %>%
+    mutate(Time = End - Start) %>%
+    pwalk(check_record_startend) %>%
+    filter(!is.na(Start) & !is.na(End))
+  # Check time
+  records %>% pwalk(check_record_time)
+}
+
+is_valid <- function(x) {
+  !is.na(x) & !is.null(x) & x != ""
+}
+
+check_record_startend <- function(Class, Tag, Event, Start, End, Time, Progress, Date, GUID) {
+  if (!is_valid(as.character(Start)) | !is_valid(as.character(End))) {
+    cat(sprintf(
+      "The record is not valid, and will be removed: \n\t%s\t%s\t%s\t%s\t%s\n",
+      Date, Class, Event, Start, End))
+  }
+}
+
+#' Check time field
+#' 
+#' @importFrom readr parse_number
+check_record_time <- function(Class, Tag, Event, Start, End, Time, Progress, Date, GUID) {
+  if (is_valid(as.character(Time)) & (parse_number(as.character(Time)) < 0) ) {
+    cat(sprintf(
+      "The time of record may be wrong: \n\t%s\t%s\t%s\t%s\t%s\t%s\n",
+      Date, Class, Event, Start, End, Time))
+  }
 }
