@@ -2,22 +2,36 @@
 #' List events of given event class.
 #' 
 #' @export
-list_class_events <- function(user_info, cls, start, end) {
-  print_time_table(user_info, start, end, "Class", cls, "Event")
+list_class_events <- function(df, cls) {
+  print_time_table(df, "Class", cls, "Event")
 }
 
-list_event_progress <- function(user_info, event, start, end) {
-  print_time_table(user_info, start, end, "Event", event, "Progress")
+#' @export
+list_event_progress <- function(df, event = NULL) {
+  if (is.null(event)) {
+    df %>%
+      dplyr::group_by(Progress) %>%
+      dplyr::summarise(count = n(), hours = as.numeric(sum(Time), "hours")) %>%
+      dplyr::arrange(desc(hours))
+  } else {
+    print_time_table(df, "Event", event, "Progress")
+  }
 }
 
-print_time_table <- function(user_info, start, end, what_to_filter, value_to_filter, what_to_arrange) {
-  start_day <- lubridate::ymd(start)
-  end_day <- lubridate::ymd(end)
-  
-  user_info %>%
-    query_records(start_day, end_day) %>%
+#' @export
+print_time_table <- function(df, what_to_filter, value_to_filter, what_to_arrange) { 
+  df %>%
     dplyr::filter(!!as.name(what_to_filter) == value_to_filter) %>%
     dplyr::group_by(!!as.name(what_to_arrange)) %>%
     dplyr::summarise(count = n(), hours = as.numeric(sum(Time), "hours")) %>%
+    dplyr::arrange(desc(hours))
+}
+
+#' @export
+summary_event_class <- function(df) {
+  df %>%
+    dplyr::group_by(Class) %>%
+    dplyr::summarise(hours = as.numeric(sum(Time), units="hours")) %>%
+    dplyr::mutate(Percent = hours/sum(hours)) %>%
     dplyr::arrange(desc(hours))
 }

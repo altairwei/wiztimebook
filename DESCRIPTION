@@ -34,4 +34,5 @@ Imports:
     plotly,
     sortable,
     shinyjqui,
-    treemapify
+    treemapify,
+    ggfittext

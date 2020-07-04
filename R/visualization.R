@@ -27,12 +27,8 @@ plot_class_time <- function(df, cls = NULL, time_units = "hours", ...) {
 #' Visualize event duration line during one day.
 #'
 #' @export
-plot_class_duration <- function(user_info, start, end) {
-  start_day <- lubridate::ymd(start)
-  end_day <- lubridate::ymd(end)
-  
-  user_info %>%
-    query_records(start_day, end_day) %>%
+plot_class_duration <- function(df) {
+  df %>%
     dplyr::mutate(Date = as.POSIXct(Date)) %>%
     ggplot2::ggplot(aes(Date, color=Class)) +
     ggplot2::scale_x_datetime() +
@@ -64,4 +60,20 @@ plot_time_hist <- function(df) {
     ggplot2::ggplot(aes(Moment, fill = Class)) +
       ggplot2::geom_histogram(position = "stack", bins = 24) + 
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust = 1))
+}
+
+#' @export
+plot_treemap <- function(df) {
+    df %>%
+      dplyr::group_by(Event) %>%
+      dplyr::summarise(Time = sum(as.numeric(Time, "hours")), 
+                Class = dplyr::first(Class)) %>%
+      ggplot2::ggplot(ggplot2::aes(area = as.numeric(Time, "hours"), 
+                 fill = Event, subgroup = Class, label = Event)) +
+      treemapify::geom_treemap() +
+      treemapify::geom_treemap_subgroup_border() +
+      treemapify::geom_treemap_text(colour = "white", place = "topleft", reflow = T) +
+      treemapify::geom_treemap_subgroup_text(place = "centre", grow = T, alpha = 0.5, colour =
+                                   "black", min.size = 0) +
+      ggplot2::theme(legend.position = "none")
 }
