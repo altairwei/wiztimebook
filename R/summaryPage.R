@@ -7,7 +7,12 @@
 summaryPageUI <- function(id) {
   ns <- NS(id)
   fluidRow(
-    box(width = 6, plotOutput(outputId = ns("treemap_plot")))
+    box(width = 3, shiny::tableOutput(outputId = ns("summary_table"))),
+    box(width = 4,
+        shiny::selectInput(inputId = ns("event_class"), label = "Class", choices = NULL),
+        shiny::tableOutput(outputId = ns("event_table"))
+    ),
+    box(width = 5, plotOutput(outputId = ns("treemap_plot")))
   )
 }
 
@@ -26,6 +31,21 @@ summaryPage <- function(input, output, session, df) {
   output$treemap_plot <- renderPlot({
     df() %>% plot_treemap()
   })
+
+  output$summary_table <- shiny::renderTable({
+    df() %>% summary_event_class()
+  })
+
+  shiny::observe({
+    data_df <- df()
+    shiny::updateSelectInput(
+      session, "event_class", choices = unique(data_df$Class))
+  })
+
+  output$event_table <- shiny::renderTable({
+    df() %>% list_class_events(input$event_class)
+  })
+
 }
 
 
