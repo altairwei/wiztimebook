@@ -8,14 +8,14 @@ eventAnalysisPageUI <- function(id) {
   ns <- NS(id)
   tagList(
     fluidRow(
-      column(width = 8,
-             box(width = NULL, plotOutput(outputId = ns("event_plot"))),
-             box(width = NULL, DT::dataTableOutput(outputId = ns("event_table")))
-      ),
       column(width = 4,
              box(width = NULL, title = "Controls",
                  textInput(inputId = ns("name_filter"), label = "Search"),
                  uiOutput(outputId = ns("progress_candidates")))
+      ),
+      column(width = 8,
+             box(width = NULL, plotOutput(outputId = ns("event_plot"))),
+             box(width = NULL, shiny::tableOutput(outputId = ns("event_table")))
       )
       
     )
@@ -69,11 +69,10 @@ eventAnalysisPage <- function(input, output, session, df) {
     }
   })
   
-  output$event_table <- DT::renderDataTable({
+  output$event_table <- shiny::renderTable({
     df_filtered <- filtered()
     if (nrow(df_filtered) != 0) {
-      df_filtered
+      list_event_progress(df_filtered)
     }
-  }, width = "100%", options = list(scrollX = TRUE, pageLength = 5)
-  )
+  })
 }

@@ -20,7 +20,8 @@ createMainUI <- function() {
         menuItem("Data Table", tabName = "data_table_page"),
         menuItem("Summary", tabName = "summary_page"),
         menuItem("Class Analysis", tabName = "class_analysis_page"),
-        menuItem("Event Analysis", tabName = "event_analysis_page")
+        menuItem("Event Analysis", tabName = "event_analysis_page"),
+        menuItem("Efficiency Analysis", tabName = "efficiency_analysis_page")
       )
     ),
     dashboardBody(
@@ -40,6 +41,10 @@ createMainUI <- function() {
         tabItem(
           tabName = "event_analysis_page",
           eventAnalysisPageUI("event_analysis_page")
+        ),
+        tabItem(
+          tabName = "efficiency_analysis_page",
+          efficiencyAnalysisPageUI("efficiency_analysis_page")
         )
       )
     )

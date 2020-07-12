@@ -36,7 +36,7 @@ plot_class_duration <- function(df) {
       limits = c(6,24), breaks=seq(6, 24, 1),
       labels=stringr::str_pad(seq(6, 24, 1) %% 24, 2, pad="0")) + 
     ggplot2::geom_linerange(
-      aes(ymin = Start - Date, ymax = End - Date), size = 2) +
+      aes(ymin = Start - Date, ymax = End - Date), size = 3) +
     ggplot2::coord_flip() + ylab("Time (hours)") + 
     ggplot2::ggtitle("Activity During Day")
 }

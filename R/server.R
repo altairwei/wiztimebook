@@ -30,4 +30,5 @@ mainServer <- function(input, output, session) {
   callModule(classAnalysisPage, "class_analysis_page", df)
   callModule(summaryPage, "summary_page", df)
   callModule(eventAnalysisPage, "event_analysis_page", df)
+  callModule(efficiencyAnalysisPage, "efficiency_analysis_page", df)
 }
