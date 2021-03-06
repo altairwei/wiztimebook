@@ -10,9 +10,18 @@ mainServer <- function(input, output, session) {
     getShinyOption("wiz_data_location")
   )
   
+  start <- getShinyOption("wiz_start_day")
+  end <- getShinyOption("wiz_end_day")
+  if (!is.null(start) && !is.null(end)) {
+    start_day <- lubridate::ymd(start)
+    end_day <- lubridate::ymd(end)
+  } else {
+    start_day <- today() - months(1)
+    end_day <- today()
+  }
   rv <- reactiveValues(
     records = user %>%
-      query_records(today() - months(1), today())
+      query_records(start_day, end_day)
   )
   
   # Update whole datatable when change date range

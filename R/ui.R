@@ -4,7 +4,7 @@
 #' @importFrom shiny dateRangeInput
 #' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar
 #' dashboardBody sidebarMenu menuItem tabItems tabItem
-createMainUI <- function() {
+createMainUI <- function(start_day, end_day) {
   dashboardPage(
     dashboardHeader(
       title = "Wiz Time Book"
@@ -14,8 +14,8 @@ createMainUI <- function() {
         dateRangeInput(
           inputId = "query_range",
           label = "Date to query:",
-          start = today() - months(1),
-          end = today()
+          start = lubridate::ymd(start_day),
+          end = lubridate::ymd(end_day)
         ),
         menuItem("Data Table", tabName = "data_table_page"),
         menuItem("Summary", tabName = "summary_page"),
