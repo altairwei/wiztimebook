@@ -83,7 +83,7 @@ user_info <- function(user_name = "", data_location = "/My Notes/") {
   # Select a default user
   if (user_name == "") {
     wiz_setting <- read.ini(file.path(wiznote_home, "wiznote.ini"))
-    default_guid <- wiz_setting$Users$DefaultUserGuid
+    default_guid <- wiz_setting$Users$defaultuserguid
     user_list <- get_local_users(wiznote_home)
     
     if (!is.null(default_guid)) {

@@ -35,4 +35,5 @@ Imports:
     sortable,
     shinyjqui,
     treemapify,
-    ggfittext
+    ggfittext,
+    rwebchannel

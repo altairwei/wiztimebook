@@ -20,6 +20,7 @@ query_records <- function(user_info, start, end) {
   end_day <- ymd(end)
   # Query meta information
   data_info_table <- query_page_metainfo(user_info, start_day, end_day)
+  #TODO: handle empty data_info_table
   #TODO: Parse table from each document
   data_info_table %>%
     pmap(function(DOCUMENT_GUID, DOCUMENT_TITLE, DOCUMENT_LOCATION) {
@@ -48,7 +49,6 @@ query_page_metainfo <- function(user_info, start, end) {
   
   # Connect to index.db
   con <- dbConnect(SQLite(), user_info$index_db)
-  
   # Fetch document meta information
   res <- dbSendQuery(con, sprintf(
     "select DOCUMENT_GUID,DOCUMENT_TITLE,DOCUMENT_LOCATION from WIZ_DOCUMENT
