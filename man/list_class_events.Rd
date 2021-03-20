@@ -4,7 +4,7 @@
 \alias{list_class_events}
 \title{List events of given event class.}
 \usage{
-list_class_events(user_info, cls, start, end)
+list_class_events(df, cls)
 }
 \description{
 List events of given event class.

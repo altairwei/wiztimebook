@@ -4,7 +4,7 @@
 \alias{createMainUI}
 \title{Create Application whole UI.}
 \usage{
-createMainUI()
+createMainUI(start_day, end_day)
 }
 \description{
 Create Application whole UI.

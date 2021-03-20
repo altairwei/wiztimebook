@@ -4,7 +4,7 @@
 \alias{plot_class_duration}
 \title{Visualize event duration line during one day.}
 \usage{
-plot_class_duration(user_info, start, end)
+plot_class_duration(df)
 }
 \description{
 Visualize event duration line during one day.

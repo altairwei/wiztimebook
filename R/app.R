@@ -9,5 +9,6 @@ run_app <- function(user_name = "", data_location = "/My Notes/", start = NULL, 
     wiz_data_location = data_location,
     wiz_start_day = start,
     wiz_end_day = end)
-  shinyApp(ui = createMainUI(start, end), server = mainServer, options = opts)
+  app <- shinyApp(ui = createMainUI(start, end), server = mainServer, options = opts)
+  shiny::runApp(app)
 }

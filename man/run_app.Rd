@@ -4,7 +4,7 @@
 \alias{run_app}
 \title{Run shiny app}
 \usage{
-run_app(user_name = "", data_location = "/My Notes/")
+run_app(user_name = "", data_location = "/My Notes/", start = NULL, end = NULL)
 }
 \description{
 Run shiny app

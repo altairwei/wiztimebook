@@ -29,6 +29,43 @@ query_records <- function(user_info, start, end) {
     }) %>% map(tidy_records) %>% reduce(bind_rows)
 }
 
+retrieve_records <- function(obj_app, data_location, start, end, callback) {
+  start_date <- lubridate::ymd(start)
+  end_date <- lubridate::ymd(end)
+
+  sql <- sprintf(
+    "DOCUMENT_LOCATION like '%s%%'
+      and DOCUMENT_TITLE like '____-__-__'
+      and DOCUMENT_TITLE >= '%s' and DOCUMENT_TITLE <= '%s'",
+    data_location, start_date, end_date)
+  sql <- iconv(sql, to="utf-8")
+
+  obj_db <- obj_app$Database
+  obj_db$DocumentsFromSQLWhere(sql, function(doc_list) {
+    fullfill <- logical(0)
+    documents <- list()
+    lapply(doc_list, function(doc) {
+      obj_app$DatabaseManager$CheckDocumentData(doc, function(ret) {
+        fullfill <<- c(fullfill, ret)
+        if (length(fullfill) == length(doc_list)) {
+          if (all(fullfill)) {
+            data_info_table <- doc_list %>%
+              purrr::map(function(doc) {
+                doc$FileName %>%
+                  read_table_from_doc_file() %>%
+                  dplyr::mutate(Date = lubridate::ymd(doc$Title), GUID = doc$GUID)
+              }) %>% purrr::map(tidy_records) %>% purrr::reduce(bind_rows)
+
+              callback(data_info_table)
+          } else {
+            stop("Document download failed.")
+          }
+        }
+      })
+    })
+  })
+}
+
 #' Find document meta information from WizNote database
 #' 
 #' `query_page_metainfo` will extract document meta information from WizNote
@@ -97,6 +134,16 @@ read_table_from_doc <- function(user_info, doc_guid) {
   t <- xml2::read_html(html_text) %>% 
     html_node("div.wiz-table-container div.wiz-table-body table") %>%
     html_table_to_dataframe(header = T) %>% as_tibble()
+  
+  t
+}
+
+read_table_from_doc_file <- function(filename) {
+  html_text <- read_html_from_doc(filename)
+
+  t <- xml2::read_html(html_text) %>% 
+    rvest::html_node("div.wiz-table-container div.wiz-table-body table") %>%
+    html_table_to_dataframe(header = T) %>% tibble::as_tibble()
   
   t
 }
