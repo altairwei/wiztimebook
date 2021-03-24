@@ -42,10 +42,12 @@ retrieve_records <- function(obj_app, data_location, start, end, callback) {
 
   obj_db <- obj_app$Database
   obj_db$DocumentsFromSQLWhere(sql, function(doc_list) {
+    message("SQL executed.")
     fullfill <- logical(0)
     documents <- list()
-    lapply(doc_list, function(doc) {
+    for (doc in doc_list) {
       obj_app$DatabaseManager$CheckDocumentData(doc, function(ret) {
+        message("Document data checked.")
         fullfill <<- c(fullfill, ret)
         if (length(fullfill) == length(doc_list)) {
           if (all(fullfill)) {
@@ -62,7 +64,7 @@ retrieve_records <- function(obj_app, data_location, start, end, callback) {
           }
         }
       })
-    })
+    }
   })
 }
 

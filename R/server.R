@@ -40,6 +40,7 @@ mainServer <- function(input, output, session) {
     #  query_records(input$query_range[[1]], input$query_range[[2]])
 
     #TODO: 提示用户选择数据文件夹，然后保存到用户数据库中。
+    message("Retrieving time book records...")
     retrieve_records(
       global_rv$WizExplorerApp,
       user$data_location,
@@ -47,6 +48,7 @@ mainServer <- function(input, output, session) {
       input$query_range[[2]],
       function(data) {
         global_rv$records <- data
+        message("Records retrieved.")
       }
     )
   })
