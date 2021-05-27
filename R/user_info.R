@@ -77,7 +77,7 @@ user_info <- function(user_name = "", data_location = "/My Notes/") {
   if (.Platform$OS.type == "windows") {
     wiznote_home = file.path(dirname(path.expand("~")), "WizNote")
   } else {
-    wiznote_home = file.path(path.expand("~"), "WizNote")
+    wiznote_home = file.path(path.expand("~"), ".wiznote")
   }
 
   # Select a default user
